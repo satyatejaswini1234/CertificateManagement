@@ -1,0 +1,124 @@
+/* General styling for the outer container */
+.outer-container11 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Form container */
+.form-container11 {
+  background: linear-gradient(to bottom right, #d8a7ca, #b39ddb, #f3e5f5);
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 900px;
+  padding: 40px;
+  box-sizing: border-box;
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* Form title styling */
+.form-title11 {
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+  border-bottom: 3px solid rgb(15, 43, 122);
+  display: inline-block;
+  padding-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* Form field container */
+.form-field11 {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* Labels for form fields */
+.form-field11 label {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #495057;
+  display: flex;
+  margin-bottom: 5px;
+}
+
+/* Input field styling */
+.form-field11 input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Input field focus effect */
+.form-field11 input:focus {
+  border-color: #fda085;
+  background-color: #f8f9fc;
+  box-shadow: 0 0 5px rgba(253, 160, 133, 0.8);
+  outline: none;
+}
+
+/* Submit button container */
+.submit-btn-container1 {
+  display: flex;
+  justify-content: center;
+}
+
+/* Submit button styling */
+.submit-btn {
+  background: linear-gradient(135deg, #fda085, #f6d365);
+  color: white;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+/* Submit button hover effect */
+.submit-btn:hover {
+  background: linear-gradient(135deg, #f6d365, #fda085);
+  transform: scale(1.05);
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .form-container11 {
+    padding: 20px;
+  }
+
+  .form-title11 {
+    font-size: 24px;
+  }
+
+  .submit-btn {
+    font-size: 14px;
+    padding: 10px 15px;
+  }
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

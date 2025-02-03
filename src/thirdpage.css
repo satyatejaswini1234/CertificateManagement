@@ -1,0 +1,39 @@
+.App {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure the whole page takes up at least the full viewport height */
+}
+
+.main-header {
+  background-color: #722edb;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  position: fixed; /* Keep the header fixed at the top */
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10; /* Ensure the header stays on top */
+}
+
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align content from the top */
+  flex-grow: 1;
+  padding: 80px 20px 20px; /* Add top padding to ensure content isn't hidden under the fixed header */
+  background-color: #f9f9f9;
+  width: 100%;
+  box-sizing: border-box;
+  flex-wrap: wrap; /* Allow content to wrap for smaller screens */
+}
+
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column; /* Stack content vertically on small screens */
+    align-items: center; /* Center items vertically */
+    padding: 100px 20px 20px; /* More space for smaller screens */
+  }
+}

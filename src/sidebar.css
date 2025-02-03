@@ -1,0 +1,168 @@
+/* Topbar container */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(180deg, #333333, #4e4e4e); /* Gradient Navbar */
+  padding: 12px 20px;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  position: relative;
+  top: 0;
+  z-index: 1000;
+  height: 60px;
+  border-bottom: 2px solid #444444; /* Slightly lighter border */
+}
+
+/* Header background color */
+header {
+  background-color: #5e3cb7; /* Purple Header */
+  color: white;
+  padding: 20px; /* Space for logo and title */
+  text-align: center;
+}
+
+/* Navigation menu */
+.menu {
+  display: flex;
+  flex-grow: 1;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu ul {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  flex-grow: 1;
+  justify-content: space-between;
+}
+
+/* List item styling */
+.menu ul li {
+  padding: 10px 15px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+/* Links styling */
+.menu ul li a {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+}
+
+/* Icons */
+.menu ul li i {
+  margin-right: 8px; /* Add space between icon and text */
+}
+
+/* Hover effects */
+.menu ul li:hover {
+  background-color: #444444; /* Darker shade on hover */
+  color: white;
+}
+
+/* Dropdown menu */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #444444; /* Dark dropdown */
+  color: white;
+  list-style: none;
+  padding: 10px 0;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-menu a:hover {
+  background-color: #333333; /* Darker background for hover effect */
+  color: white;
+}
+
+.dropdown-menu a i {
+  margin-right: 8px;
+}
+
+/* Hamburger menu */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.hamburger .bar {
+  width: 100%;
+  height: 4px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .menu ul {
+    display: none;
+    flex-direction: column;
+    background-color: #000000; /* Dark background for mobile */
+    width: 100%;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 999;
+  }
+
+  .menu ul.open {
+    display: flex;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .menu ul li {
+    padding: 12px 0;
+    text-align: center;
+    background-color: #000000;
+    color: white;
+  }
+
+  .menu ul li:hover {
+    background-color: #333333; /* Lighter hover effect on mobile */
+    color: white;
+  }
+
+  .dropdown-menu {
+    position: static;
+    width: 100%;
+    background-color: #444444; /* Dropdown consistency */
+  }
+}

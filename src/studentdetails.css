@@ -1,0 +1,132 @@
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* General Styling */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f0f4f8;
+  margin: 0;
+  padding: 0;
+  color: #333;
+ 
+}
+
+/* Container for the entire page */
+.student-details-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* Welcome Section Styling */
+.welcome-section {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #6a11cb, #d667f7);
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  width: 100%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-image {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  margin-right: 20px;
+  border: 3px solid #fff;
+}
+
+.welcome-text h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.welcome-text h3 {
+  margin: 5px 0 0;
+  font-size: 26px;
+  font-weight: bold;
+}
+
+/* Profile Details Section */
+.details-section {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.details-section h3 {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 25px;
+  color: #6a11cb;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: #555;
+  width: 40%;
+}
+
+.placeholder-space {
+  width: 60%;
+  padding: 10px;
+  background-color: #f7f7f7;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #666;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+}
+
+.placeholder-space:hover {
+  background-color: #e6f0ff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .welcome-section {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+  }
+
+  .welcome-image {
+    margin-bottom: 15px;
+  }
+
+  .input-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .input-group label,
+  .placeholder-space {
+    width: 100%;
+  }
+}
