@@ -52,7 +52,23 @@ app.get("/api/student/:regNo", (req, res) => {
     res.json(results[0]);
   });
 });
+app.get("/api/faculty/:regNo", (req, res) => {
+  const { regNo } = req.params;
+  const query = "SELECT * FROM faculty_profile WHERE username = ?";
 
+  db.query(query, [regNo], (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Faculty not found" });
+    }
+
+    res.status(200).json(results[0]);
+  });
+});
 // Login API
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
@@ -61,28 +77,54 @@ app.post("/api/login", (req, res) => {
     return res.status(400).json({ message: "Username and password required" });
   }
 
-  // Query to check if the username exists in the `profile` table
-  const query = `SELECT reg_no, student_password FROM profile WHERE reg_no = ?`;
-  db.query(query, [username], (err, results) => {
-    if (err) {
-      console.error("Error querying database:", err.message);
-      return res.status(500).json({ message: "Database error" });
-    }
+  // Check if it's a faculty login (username length = 4)
+  if (username.length === 4) {
+    const facultyQuery = `SELECT username, password FROM faculty_profile WHERE username = ?`;
+    db.query(facultyQuery, [username], (err, results) => {
+      if (err) {
+        console.error("Error querying faculty database:", err.message);
+        return res.status(500).json({ message: "Database error" });
+      }
 
-    if (results.length === 0) {
-      return res.status(404).json({ message: "User not found" });
-    }
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Faculty not found" });
+      }
 
-    const user = results[0];
+      const faculty = results[0];
+      if (password !== faculty.password) {
+        return res.status(401).json({ message: "Invalid password" });
+      }
 
-    // Plain-text password comparison
-    if (password !== user.student_password) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
+      return res
+        .status(200)
+        .json({ message: "Login successful", role: "faculty" });
+    });
+  }
+  // Student login logic
+  else {
+    const studentQuery = `SELECT reg_no, student_password FROM profile WHERE reg_no = ?`;
+    db.query(studentQuery, [username], (err, results) => {
+      if (err) {
+        console.error("Error querying student database:", err.message);
+        return res.status(500).json({ message: "Database error" });
+      }
 
-    res.status(200).json({ message: "Login successful" });
-  });
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Student not found" });
+      }
+
+      const student = results[0];
+      if (password !== student.student_password) {
+        return res.status(401).json({ message: "Invalid password" });
+      }
+
+      return res
+        .status(200)
+        .json({ message: "Login successful", role: "student" });
+    });
+  }
 });
+
 // API to Update Password
 app.post("/api/update-password", (req, res) => {
   console.log(req.body);
@@ -209,8 +251,62 @@ app.post("/api/nptel", upload.single("uploadedCertificate"), (req, res) => {
     }
   });
 });
+app.post(
+  "/api/nptel_faculty",
+  upload.single("uploadedCertificate"),
+  (req, res) => {
+    const {
+      registrationNumber,
+      courseName,
+      duration,
+      startDate,
+      endDate,
+      academicYear,
+      consolidatedScore,
+      credits,
+      certificateType,
+      issuedBy,
+    } = req.body;
 
-// API to Get Certificates by Registration Number
+    if (!courseName) {
+      return res.status(400).json({ message: "Course name is required" });
+    }
+
+    const certificatePath = `/certificates/${req.file.filename}`;
+
+    const query = `
+    INSERT INTO faculty_nptel (
+      username, course_name, duration, start_date, end_date,
+      academic_year, consolidated_score, credits, elite_status,
+      issued_by, certificate_path
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+    const values = [
+      registrationNumber,
+      courseName,
+      duration,
+      startDate,
+      endDate,
+      academicYear,
+      consolidatedScore,
+      credits,
+      certificateType,
+      issuedBy,
+      certificatePath,
+    ];
+
+    db.query(query, values, (err) => {
+      if (err) {
+        console.error("Error inserting NPTEL data:", err.message);
+        res.status(500).json({ message: "Failed to insert NPTEL data" });
+      } else {
+        res.status(200).json({ message: "NPTEL data added successfully!" });
+      }
+    });
+  }
+);
 app.get("/api/certificates/:regNo", (req, res) => {
   const { regNo } = req.params;
 
@@ -241,7 +337,36 @@ app.get("/api/certificates/:regNo", (req, res) => {
     res.json(results);
   });
 });
+app.get("/api/certificates_faculty/:regNo", (req, res) => {
+  const { regNo } = req.params;
 
+  const query = `
+    SELECT 
+      certificate_path,
+      course_name,
+      academic_year,
+      consolidated_score,
+      elite_status,
+      start_date,
+      end_date
+    FROM faculty_nptel
+    WHERE username = ?
+    ORDER BY start_date DESC
+  `;
+
+  db.query(query, [regNo], (err, results) => {
+    if (err) {
+      console.error("Error fetching certificates:", err);
+      return res.status(500).json({ message: "Error fetching certificates" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "No certificates found" });
+    }
+
+    res.json(results);
+  });
+});
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

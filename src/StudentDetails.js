@@ -5,7 +5,6 @@ const StudentDetails = () => {
   const [studentData, setStudentData] = useState(null);
   const [error, setError] = useState(null);
 
-  // Assuming reg_no is stored in localStorage after login
   const regNo = localStorage.getItem("reg_no");
 
   useEffect(() => {

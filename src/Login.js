@@ -7,7 +7,7 @@ import Header from "./Header";
 const Login = () => {
   const userRef = useRef(null);
   const passwordRef = useRef(null);
-  const { setIsLogin } = useContext(appContext);
+  const { setIsLogin, setRole } = useContext(appContext);
 
   useEffect(() => {
     userRef.current.focus();
@@ -27,6 +27,7 @@ const Login = () => {
       if (response.status === 200) {
         alert("Login Successful");
         setIsLogin("login");
+        setRole(response.data.role);
         localStorage.setItem("reg_no", username);
         localStorage.setItem("student_password", password);
         console.log("Successfully logged in");

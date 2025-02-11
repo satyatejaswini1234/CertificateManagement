@@ -8,7 +8,6 @@ import ViewCertificate from "./ViewCertificate";
 import Header from "./Header";
 import ChangePassword from "./ChangePassword";
 import ContactUs from "./ContactUs";
-
 function ThirdPage() {
   const [currentView, setCurrentView] = useState("studentDetails");
   const toggleView = (view) => {
@@ -21,7 +20,7 @@ function ThirdPage() {
         return <Certificate />;
       case "nptelcertificate":
         return <Nptel />;
-      case "viewCertificate": // Add the ViewCertificate case
+      case "viewCertificate": 
         return <ViewCertificate />;
       case "changePassword":
         return <ChangePassword />;

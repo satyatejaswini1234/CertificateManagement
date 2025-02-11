@@ -1,9 +1,8 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./sidebar.css"; 
 import { appContext } from "./App";
-
-const Topbar = ({ toggleView }) => {
+import "./sidebar.css";
+const Sidebar_Faculty = ({ toggleView }) => {
   const navigate = useNavigate();
   const { setIsLogin } = useContext(appContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,11 +11,9 @@ const Topbar = ({ toggleView }) => {
     setIsLogin("notlogin");
     navigate("/");
   };
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-
   return (
     <header className="topbar">
       <nav className="menu">
@@ -27,22 +24,14 @@ const Topbar = ({ toggleView }) => {
         </div>
 
         <ul className={isMenuOpen ? "open" : ""}>
-          <li onClick={handleLogoutClick}>
-            <a href="#home">
-              <i className="fas fa-home"></i> Home
-            </a>
+          <li onClick={() => toggleView("/")}>
+            <i className="bi bi-house"></i> Home
           </li>
-          <li>
-            <a href="#home">
-              <i className="fas fa-th-large"></i> Dashboard{" "}
-            </a>
+          <li onClick={() => toggleView("profile_fac")}>
+            <i className="bi bi-person"></i> Profile
           </li>
-          {/* <li><a href="#home"><i className="fas fa-dashboard"></i>At a Glance</a></li>
-          <li><a href="#notification"><i className="fas fa-bell"></i> Notification </a></li> */}
-          <li onClick={() => toggleView("studentDetails")}>
-            <a href="#profile">
-              <i className="fas fa-user"></i> Profile
-            </a>
+          <li onClick={() => toggleView("research")}>
+            <i className="bi bi-search"></i> Research Profile
           </li>
           <li className="dropdown">
             <span>
@@ -52,7 +41,7 @@ const Topbar = ({ toggleView }) => {
               <a href="#Certificate" onClick={() => toggleView("certificate")}>
                 <i className="fas fa-upload"></i> Upload Certificate
               </a>
-              <a href="#Nptel" onClick={() => toggleView("nptelcertificate")}>
+              <a href="#Nptel" onClick={() => toggleView("nptel")}>
                 <i className="fas fa-upload"></i> Upload NPTEL Certificate
               </a>
               <a
@@ -63,23 +52,8 @@ const Topbar = ({ toggleView }) => {
               </a>
             </div>
           </li>
-          <li>
-            <a
-              href="#changePassword"
-              onClick={() => toggleView("changePassword")}
-            >
-              <i className="fas fa-lock"></i> Change Password{" "}
-            </a>
-          </li>
-          <li>
-            <a href="#ContactUs" onClick={() => toggleView("contactUs")}>
-              <i className="fas fa-phone"></i> Contact Us{" "}
-            </a>
-          </li>
           <li onClick={handleLogoutClick}>
-            <a href="#logout">
-              <i className="fas fa-sign-out-alt"></i> Log Out
-            </a>
+            <i className="bi bi-box-arrow-right"></i> Logout
           </li>
         </ul>
       </nav>
@@ -87,4 +61,4 @@ const Topbar = ({ toggleView }) => {
   );
 };
 
-export default Topbar;
+export default Sidebar_Faculty;

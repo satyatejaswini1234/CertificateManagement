@@ -6,11 +6,14 @@ export const appContext = createContext();
 
 function App() {
   const [isLogin, setIsLogin] = useState("notlogin");
+  const [role, setRole] = useState(null); 
   return (
     <appContext.Provider
       value={{
         isLogin,
         setIsLogin,
+        role,
+        setRole
       }}
     >
       <BrowserRouter>

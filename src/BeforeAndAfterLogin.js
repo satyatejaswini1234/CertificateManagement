@@ -2,9 +2,10 @@ import { useContext } from "react";
 import { appContext } from "./App";
 import Login from "./Login";
 import ThirdPage from "./ThirdPage";
+import ThirdPage2 from "./ThirdPage2";
 
 function BeforeAndAfterLogin() {
-  const { isLogin, setIsLogin } = useContext(appContext);
+  const { isLogin, setIsLogin, role } = useContext(appContext);
 
   const handleLogout = () => {
     setIsLogin("notlogin");
@@ -12,7 +13,15 @@ function BeforeAndAfterLogin() {
 
   return (
     <div>
-      {isLogin === "login" ? <ThirdPage onLogout={handleLogout} /> : <Login />}
+      {isLogin === "login" ? (
+        role === "faculty" ? (
+          <ThirdPage2 onLogout={handleLogout} />  
+        ) : (
+          <ThirdPage onLogout={handleLogout} />    
+        )
+      ) : (
+        <Login />
+      )}
     </div>
   );
 }
