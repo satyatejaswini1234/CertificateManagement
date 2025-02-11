@@ -26,7 +26,6 @@ db.connect((err) => {
   if (err) throw err;
   console.log("Connected to MySQL Database");
 });
-/// API to Get Student Details by Registration Number
 app.get("/api/student/:regNo", (req, res) => {
   const { regNo } = req.params;
 
@@ -63,7 +62,7 @@ app.post("/api/login", (req, res) => {
   }
 
   // Query to check if the username exists in the `profile` table
-  const query = `SELECT reg_no FROM profile WHERE reg_no = ?`;
+  const query = `SELECT reg_no, student_password FROM profile WHERE reg_no = ?`;
   db.query(query, [username], (err, results) => {
     if (err) {
       console.error("Error querying database:", err.message);
@@ -74,12 +73,51 @@ app.post("/api/login", (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Validate password (static password: "svecw2022" for all users)
-    if (password !== "svecw2022") {
+    const user = results[0];
+
+    // Plain-text password comparison
+    if (password !== user.student_password) {
       return res.status(401).json({ message: "Invalid password" });
     }
 
     res.status(200).json({ message: "Login successful" });
+  });
+});
+// API to Update Password
+app.post("/api/update-password", (req, res) => {
+  console.log(req.body);
+  const { regNo, existingPassword, newPassword } = req.body;
+
+  if (!regNo || !existingPassword || !newPassword) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const verifyQuery = `SELECT student_password FROM profile WHERE reg_no = ?`;
+  db.query(verifyQuery, [regNo], (err, results) => {
+    if (err) {
+      console.error("Error querying database:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const currentPassword = results[0].student_password;
+
+    if (existingPassword !== currentPassword) {
+      return res.status(401).json({ message: "Old password is incorrect" });
+    }
+
+    const updateQuery = `UPDATE profile SET student_password = ? WHERE reg_no = ?`;
+    db.query(updateQuery, [newPassword, regNo], (err) => {
+      if (err) {
+        console.error("Error updating password:", err);
+        return res.status(500).json({ message: "Failed to update password" });
+      }
+
+      res.status(200).json({ message: "Password updated successfully!" });
+    });
   });
 });
 

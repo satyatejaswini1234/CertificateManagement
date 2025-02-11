@@ -28,6 +28,7 @@ const Login = () => {
         alert("Login Successful");
         setIsLogin("login");
         localStorage.setItem("reg_no", username);
+        localStorage.setItem("student_password", password);
         console.log("Successfully logged in");
       }
     } catch (error) {
@@ -75,7 +76,7 @@ const Login = () => {
               ref={passwordRef}
             />
             <div className="login-options">
-              <a href="#" className="forgot-password">
+              <a href="#forgot" className="forgot-password">
                 Forgot password
               </a>
             </div>

@@ -7,8 +7,7 @@ const ViewCertificate = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Fetching regNo from the logged-in user's session or context (e.g., localStorage, global context)
-  const regNo = localStorage.getItem("reg_no"); // or use a context/global state to retrieve it
+  const regNo = localStorage.getItem("reg_no"); 
 
   useEffect(() => {
     if (regNo) {
