@@ -4,7 +4,6 @@ const cors = require("cors");
 const path = require("path");
 const mysql = require("mysql");
 const XLSX = require("xlsx");
-
 const app = express();
 const PORT = 5000;
 
@@ -437,12 +436,105 @@ app.post(
   }
 );
 // API endpoint to fetch NPTEL and Normal Certificates
+app.get("/api/training_distinct_values", (req, res) => {
+  let query = `
+    SELECT DISTINCT p.branch AS branch, NULL AS section, NULL AS trainingName, NULL AS organisedBy, NULL AS mode FROM profile p
+    UNION
+    SELECT NULL AS branch, p.section AS section, NULL AS trainingName, NULL AS organisedBy, NULL AS mode FROM profile p
+    UNION
+    SELECT NULL AS branch, NULL AS section, cn.training_name AS trainingName, NULL AS organisedBy, NULL AS mode FROM certificates_normal cn
+    UNION
+    SELECT NULL AS branch, NULL AS section, NULL AS trainingName, cn.organized_by AS organisedBy, NULL AS mode FROM certificates_normal cn
+    UNION
+    SELECT NULL AS branch, NULL AS section, NULL AS trainingName, NULL AS organisedBy, cn.mode AS mode FROM certificates_normal cn
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Error fetching distinct values:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    console.log("Training Distinct Values:", results);
+
+    const response = {
+      branches: [],
+      sections: [],
+      trainingNames: [],
+      organisedBy: [],
+      modes: [],
+    };
+
+    results.forEach((row) => {
+      if (row.branch) response.branches.push(row.branch);
+      if (row.section) response.sections.push(row.section);
+      if (row.trainingName) response.trainingNames.push(row.trainingName);
+      if (row.organisedBy) response.organisedBy.push(row.organisedBy);
+      if (row.mode) response.modes.push(row.mode);
+    });
+
+    console.log("Formatted Training Response:", response);
+    res.status(200).json(response);
+  });
+});
+
+
+app.get("/api/nptel_distinct_values", (req, res) => {
+  let query = `
+    SELECT DISTINCT p.section AS section, NULL AS courseName, NULL AS academicYear, NULL AS branch, NULL AS issuedBy FROM profile p
+    UNION
+    SELECT NULL AS section, n.course_name AS courseName, NULL AS academicYear, NULL AS branch, NULL AS issuedBy FROM nptel n
+    UNION
+    SELECT NULL AS section, NULL AS courseName, n.academic_year AS academicYear, NULL AS branch, NULL AS issuedBy FROM nptel n
+    UNION
+    SELECT NULL AS section, NULL AS courseName, NULL AS academicYear, p.branch AS branch, NULL AS issuedBy FROM profile p
+    UNION
+    SELECT NULL AS section, NULL AS courseName, NULL AS academicYear, NULL AS branch, n.issued_by AS issuedBy FROM nptel n
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Error fetching distinct values:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    console.log("NPTEL Distinct Values:", results);
+
+    const response = {
+      sections: [],
+      courseNames: [],
+      academicYears: [],
+      branches: [],
+      issuedBy: [],
+    };
+
+    results.forEach((row) => {
+      if (row.section) response.sections.push(row.section);
+      if (row.courseName) response.courseNames.push(row.courseName);
+      if (row.academicYear) response.academicYears.push(row.academicYear);
+      if (row.branch) response.branches.push(row.branch);
+      if (row.issuedBy) response.issuedBy.push(row.issuedBy);
+    });
+
+    console.log("Formatted NPTEL Response:", response);
+    res.status(200).json(response);
+  });
+});
+
+
 app.get("/api/nptel_certificates", (req, res) => {
-  const { section, courseName } = req.query;
+  const {
+    section,
+    courseName,
+    academicYear,
+    branch,
+    issuedBy,
+    certificateType,
+  } = req.query;
 
   let query = `
-    SELECT nptel.*, profile.section 
-    FROM nptel 
+    SELECT nptel.*, profile.section, profile.branch
+    FROM nptel
     JOIN profile ON nptel.reg_no = profile.reg_no
     WHERE 1=1
   `;
@@ -453,12 +545,32 @@ app.get("/api/nptel_certificates", (req, res) => {
     query += " AND profile.section = ?";
     queryParams.push(section);
   }
+
   if (courseName) {
     query += " AND nptel.course_name = ?";
     queryParams.push(courseName);
   }
 
-  // Add logging to debug the query
+  if (academicYear) {
+    query += " AND nptel.academic_year = ?";
+    queryParams.push(academicYear);
+  }
+
+  if (branch) {
+    query += " AND profile.branch = ?";
+    queryParams.push(branch);
+  }
+
+  if (issuedBy) {
+    query += " AND nptel.issued_by = ?";
+    queryParams.push(issuedBy);
+  }
+
+  if (certificateType) {
+    query += " AND nptel.elite_status = ?";
+    queryParams.push(certificateType);
+  }
+
   console.log("Query:", query);
   console.log("Parameters:", queryParams);
 
@@ -467,11 +579,11 @@ app.get("/api/nptel_certificates", (req, res) => {
       console.error("Error fetching NPTEL certificates:", err);
       return res.status(500).json({ message: "Database error" });
     }
-    // Log the results
     console.log("Query results:", results);
     res.status(200).json(results);
   });
 });
+
 app.get("/api/nptel_certificates/download", (req, res) => {
   const { section, courseName } = req.query;
   const baseUrl = "http://localhost:5000";
@@ -513,9 +625,9 @@ app.get("/api/nptel_certificates/download", (req, res) => {
 
     try {
       // Add full URL to certificate paths
-      const modifiedResults = results.map(row => ({
+      const modifiedResults = results.map((row) => ({
         ...row,
-        'Certificate Path': `${baseUrl}${row['Certificate Path']}`
+        "Certificate Path": `${baseUrl}${row["Certificate Path"]}`,
       }));
 
       // Create a new workbook
@@ -551,6 +663,134 @@ app.get("/api/nptel_certificates/download", (req, res) => {
     }
   });
 });
+// Training certificates route
+app.get("/api/training_certificates", (req, res) => {
+  const { branch, section, trainingName, organizedBy, mode } = req.query;
+
+  let query = `
+    SELECT 
+      cn.*,
+      p.reg_no,
+      p.branch,
+      p.section,
+      CONCAT('${process.env.BASE_URL}', cn.certificate_path) AS full_certificate_path
+    FROM certificates_normal cn
+    JOIN profile p ON cn.username = p.reg_no
+    WHERE 1=1
+  `;
+
+  let queryParams = [];
+
+  if (trainingName) {
+    query += " AND cn.training_name = ?";
+    queryParams.push(trainingName);
+  }
+  if (organizedBy) {
+    query += " AND cn.organized_by = ?";
+    queryParams.push(organizedBy);
+  }
+  if (mode) {
+    query += " AND cn.mode = ?";
+    queryParams.push(mode);
+  }
+  if (branch) {
+    query += " AND p.branch = ?";
+    queryParams.push(branch);
+  }
+  if (section) {
+    query += " AND p.section = ?";
+    queryParams.push(section);
+  }
+
+  db.query(query, queryParams, (err, results) => {
+    if (err) {
+      console.error("Error fetching training certificates:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    res.status(200).json(results);
+  });
+});
+
+app.get("/api/training_certificates/download", (req, res) => {
+  const { section, courseName } = req.query;
+  const baseUrl = "http://localhost:5000";
+
+  let query = `
+    SELECT 
+      profile.reg_no as 'Registration Number',
+      profile.student_name as 'Student Name',
+      profile.branch as 'Branch',
+      profile.section as 'Section',
+    certificates_normal.training_name as 'Course Name',
+      certificates_normal.organized_by as 'Organised By',
+      certificates_normal.certificate_path as 'Certificate Path'
+    FROM certificates_normal
+    JOIN profile ON certificates_normal.username = profile.reg_no
+    WHERE 1=1
+  `;
+
+  let queryParams = [];
+
+  if (section) {
+    query += " AND profile.section = ?";
+    queryParams.push(section);
+  }
+  if (courseName) {
+    query += " AND certificates_normal.training_name = ?";
+    queryParams.push(courseName);
+  }
+
+  db.query(query, queryParams, (err, results) => {
+    if (err) {
+      console.error("Error fetching data for Excel:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    try {
+      // Add full URL to certificate paths
+      const modifiedResults = results.map((row) => ({
+        ...row,
+        "Certificate Path": `${baseUrl}${row["Certificate Path"]}`,
+      }));
+
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
+
+      // Convert results to worksheet
+      const worksheet = XLSX.utils.json_to_sheet(modifiedResults);
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(
+        workbook,
+        worksheet,
+        "Training Certificates"
+      );
+
+      // Generate buffer
+      const excelBuffer = XLSX.write(workbook, {
+        type: "buffer",
+        bookType: "xlsx",
+      });
+
+      // Set headers for Excel download
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=training_certificates.xlsx"
+      );
+
+      // Send file
+      res.send(excelBuffer);
+    } catch (error) {
+      console.error("Error generating Excel:", error);
+      res.status(500).json({ message: "Error generating Excel file" });
+    }
+  });
+});
+
 app.get("/api/certificates/:regNo", (req, res) => {
   const regNo = req.params.regNo;
 
