@@ -185,7 +185,6 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 });
 
-// API to Add NPTEL Data
 app.post("/api/nptel", upload.single("uploadedCertificate"), (req, res) => {
   const {
     registrationNumber, // Get username from request
@@ -435,7 +434,6 @@ app.post(
     }
   }
 );
-// API endpoint to fetch NPTEL and Normal Certificates
 app.get("/api/training_distinct_values", (req, res) => {
   let query = `
     SELECT DISTINCT p.branch AS branch, NULL AS section, NULL AS trainingName, NULL AS organisedBy, NULL AS mode FROM profile p

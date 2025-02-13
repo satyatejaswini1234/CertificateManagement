@@ -25,13 +25,13 @@ const Sidebar_Faculty = ({ toggleView }) => {
 
         <ul className={isMenuOpen ? "open" : ""}>
           <li onClick={() => toggleView("profile_fac")}>
-            <i className="bi bi-person"></i> Home
+            <i className="fas fa-user"></i>Home
           </li>
           <li onClick={() => toggleView("research")}>
-            <i className="bi bi-search"></i> Research Profile
+            <i class="fa fa-book"></i>Research Profile
           </li>
           <li onClick={() => toggleView("studentData")}>
-            <i className="bi bi-search"></i> Student Data 
+          <i class="fa fa-file-alt"></i> Student Data
           </li>
           <li className="dropdown">
             <span>
@@ -53,7 +53,7 @@ const Sidebar_Faculty = ({ toggleView }) => {
             </div>
           </li>
           <li onClick={handleLogoutClick}>
-            <i className="bi bi-box-arrow-right"></i> Logout
+          <i className="fas fa-sign-out-alt"></i> Logout
           </li>
         </ul>
       </nav>
