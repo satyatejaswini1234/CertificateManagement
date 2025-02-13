@@ -3,6 +3,7 @@ const multer = require("multer");
 const cors = require("cors");
 const path = require("path");
 const mysql = require("mysql");
+const XLSX = require("xlsx");
 
 const app = express();
 const PORT = 5000;
@@ -436,6 +437,120 @@ app.post(
   }
 );
 // API endpoint to fetch NPTEL and Normal Certificates
+app.get("/api/nptel_certificates", (req, res) => {
+  const { section, courseName } = req.query;
+
+  let query = `
+    SELECT nptel.*, profile.section 
+    FROM nptel 
+    JOIN profile ON nptel.reg_no = profile.reg_no
+    WHERE 1=1
+  `;
+
+  let queryParams = [];
+
+  if (section) {
+    query += " AND profile.section = ?";
+    queryParams.push(section);
+  }
+  if (courseName) {
+    query += " AND nptel.course_name = ?";
+    queryParams.push(courseName);
+  }
+
+  // Add logging to debug the query
+  console.log("Query:", query);
+  console.log("Parameters:", queryParams);
+
+  db.query(query, queryParams, (err, results) => {
+    if (err) {
+      console.error("Error fetching NPTEL certificates:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+    // Log the results
+    console.log("Query results:", results);
+    res.status(200).json(results);
+  });
+});
+app.get("/api/nptel_certificates/download", (req, res) => {
+  const { section, courseName } = req.query;
+  const baseUrl = "http://localhost:5000";
+
+  let query = `
+    SELECT 
+      nptel.reg_no as 'Registration Number',
+      profile.student_name as 'Student Name',
+      profile.branch as 'Branch',
+      profile.section as 'Section',
+      nptel.course_name as 'Course Name',
+      nptel.duration as 'Duration',
+      nptel.academic_year as 'Academic Year',
+      nptel.consolidated_score as 'Consolidated Score',
+      nptel.elite_status as 'Elite/Non-Elite',
+      nptel.issued_by as 'Issued By',
+      nptel.certificate_path as 'Certificate Path'
+    FROM nptel
+    JOIN profile ON nptel.reg_no = profile.reg_no
+    WHERE 1=1
+  `;
+
+  let queryParams = [];
+
+  if (section) {
+    query += " AND profile.section = ?";
+    queryParams.push(section);
+  }
+  if (courseName) {
+    query += " AND nptel.course_name = ?";
+    queryParams.push(courseName);
+  }
+
+  db.query(query, queryParams, (err, results) => {
+    if (err) {
+      console.error("Error fetching data for excel:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    try {
+      // Add full URL to certificate paths
+      const modifiedResults = results.map(row => ({
+        ...row,
+        'Certificate Path': `${baseUrl}${row['Certificate Path']}`
+      }));
+
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
+
+      // Convert the modified results to worksheet
+      const worksheet = XLSX.utils.json_to_sheet(modifiedResults);
+
+      // Add the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "NPTEL Certificates");
+
+      // Generate buffer
+      const excelBuffer = XLSX.write(workbook, {
+        type: "buffer",
+        bookType: "xlsx",
+      });
+
+      // Set headers for excel download
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=nptel_certificates.xlsx"
+      );
+
+      // Send the file
+      res.send(excelBuffer);
+    } catch (error) {
+      console.error("Error generating excel:", error);
+      res.status(500).json({ message: "Error generating excel file" });
+    }
+  });
+});
 app.get("/api/certificates/:regNo", (req, res) => {
   const regNo = req.params.regNo;
 
@@ -465,37 +580,6 @@ app.get("/api/certificates/:regNo", (req, res) => {
     });
   });
 });
-
-// app.get("/api/certificates/:regNo", (req, res) => {
-//   const { regNo } = req.params;
-
-//   const query = `
-//     SELECT
-//       certificate_path,
-//       course_name,
-//       academic_year,
-//       consolidated_score,
-//       elite_status,
-//       start_date,
-//       end_date
-//     FROM nptel
-//     WHERE reg_no = ?
-//     ORDER BY start_date DESC
-//   `;
-
-//   db.query(query, [regNo], (err, results) => {
-//     if (err) {
-//       console.error("Error fetching certificates:", err);
-//       return res.status(500).json({ message: "Error fetching certificates" });
-//     }
-
-//     if (results.length === 0) {
-//       return res.status(404).json({ message: "No certificates found" });
-//     }
-
-//     res.json(results);
-//   });
-// });
 app.get("/api/certificates_faculty/:regNo", (req, res) => {
   const regNo = req.params.regNo;
 

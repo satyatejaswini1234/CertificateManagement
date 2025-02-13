@@ -30,7 +30,7 @@ const Sidebar_Faculty = ({ toggleView }) => {
           <li onClick={() => toggleView("research")}>
             <i className="bi bi-search"></i> Research Profile
           </li>
-          <li onClick={() => toggleView("")}>
+          <li onClick={() => toggleView("studentData")}>
             <i className="bi bi-search"></i> Student Data 
           </li>
           <li className="dropdown">

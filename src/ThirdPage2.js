@@ -12,6 +12,7 @@ import ResearchProfile from "./Researchprofile";
 import Nptel_Faculty from "./Nptel_Faculty";
 import ViewCertificate_Faculty from "./ViewCertificate_Faculty";
 import Certificate_Faculty from "./Certificate_Faculty";
+import FacultyCertificateFilter from "./FacultyCertificateFilter";
 
 function ThirdPage2() {
   const [currentView, setCurrentView] = useState("studentDetails");
@@ -35,6 +36,8 @@ function ThirdPage2() {
         return <Profile_fac />;
       case "research":
         return <ResearchProfile />;
+      case "studentData":
+        return <FacultyCertificateFilter/>;
       case "nptel":
         return <Nptel_Faculty/>
       default:
