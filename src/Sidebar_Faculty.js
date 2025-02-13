@@ -24,14 +24,14 @@ const Sidebar_Faculty = ({ toggleView }) => {
         </div>
 
         <ul className={isMenuOpen ? "open" : ""}>
-          <li onClick={() => toggleView("/")}>
-            <i className="bi bi-house"></i> Home
-          </li>
           <li onClick={() => toggleView("profile_fac")}>
-            <i className="bi bi-person"></i> Profile
+            <i className="bi bi-person"></i> Home
           </li>
           <li onClick={() => toggleView("research")}>
             <i className="bi bi-search"></i> Research Profile
+          </li>
+          <li onClick={() => toggleView("")}>
+            <i className="bi bi-search"></i> Student Data 
           </li>
           <li className="dropdown">
             <span>

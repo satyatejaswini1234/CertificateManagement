@@ -5,6 +5,23 @@
   animation: fadeIn 1s ease-in-out;
 
 }
+.no-certificates {
+  background-color: #ff4d4f; /* Softer red */
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+  margin: 20px auto;
+  width: 80%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.no-certificates:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
 
 /* Header */
 .header {

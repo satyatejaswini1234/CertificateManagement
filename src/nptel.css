@@ -51,6 +51,13 @@
   display: flex;
   margin-bottom: 5px;
 }
+.large-input {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s;
+  height: 50px; 
+  font-size: 16px; 
+}
 
 .form-field input {
   width: 100%;

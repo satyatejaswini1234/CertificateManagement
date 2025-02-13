@@ -28,20 +28,30 @@ const Login = () => {
         alert("Login Successful");
         setIsLogin("login");
         setRole(response.data.role);
-        localStorage.setItem("reg_no", username);
-        localStorage.setItem("student_password", password);
-        console.log("Successfully logged in");
+
+        // Store only the registration number (username)
+        localStorage.setItem("reg_no", response.data.username);
+
+        console.log("Successfully logged in as:", response.data.username);
+
+        // Perform additional actions if needed (e.g., redirect)
       }
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        alert("User not found");
-      } else if (error.response && error.response.status === 401) {
-        alert("Invalid password");
+      if (error.response) {
+        if (error.response.status === 404) {
+          alert("User not found");
+        } else if (error.response.status === 401) {
+          alert("Invalid password");
+        } else {
+          alert("An error occurred. Please try again later.");
+        }
+        console.error("Login error:", error.response.data.message);
       } else {
-        alert("An error occurred. Please try again later.");
+        alert("Server not reachable.");
+        console.error("Network error:", error);
       }
+
       setIsLogin("notlogin");
-      console.error("Error logging in:", error);
     }
 
     // Clear inputs

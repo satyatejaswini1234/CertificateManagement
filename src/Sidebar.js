@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./sidebar.css"; 
+import "./sidebar.css";
 import { appContext } from "./App";
 
 const Topbar = ({ toggleView }) => {
@@ -27,21 +27,16 @@ const Topbar = ({ toggleView }) => {
         </div>
 
         <ul className={isMenuOpen ? "open" : ""}>
-          <li onClick={handleLogoutClick}>
+          {/* <li onClick={handleLogoutClick}>
             <a href="#home">
               <i className="fas fa-home"></i> Home
             </a>
-          </li>
-          <li>
-            <a href="#home">
-              <i className="fas fa-th-large"></i> Dashboard{" "}
-            </a>
-          </li>
+          </li> */}
           {/* <li><a href="#home"><i className="fas fa-dashboard"></i>At a Glance</a></li>
           <li><a href="#notification"><i className="fas fa-bell"></i> Notification </a></li> */}
           <li onClick={() => toggleView("studentDetails")}>
             <a href="#profile">
-              <i className="fas fa-user"></i> Profile
+              <i className="fas fa-user"></i> Home
             </a>
           </li>
           <li className="dropdown">

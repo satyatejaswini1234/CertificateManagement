@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./nptel.css";
 
@@ -18,6 +18,28 @@ const NptelForm = () => {
   });
 
   const [statusMessage, setStatusMessage] = useState("");
+  const [academicYears, setAcademicYears] = useState([]);
+
+  useEffect(() => {
+    const storedRegNo = localStorage.getItem("reg_no");
+    if (storedRegNo) {
+      setNptelData((prevState) => ({
+        ...prevState,
+        registrationNumber: storedRegNo,
+      }));
+    }
+
+    // Generate dynamic academic years
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear - 4;
+    const endYear = currentYear + 4;
+
+    const years = [];
+    for (let year = startYear; year < endYear; year++) {
+      years.push(`${year}-${year + 1}`);
+    }
+    setAcademicYears(years);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
@@ -32,7 +54,9 @@ const NptelForm = () => {
 
     const formData = new FormData();
     for (const key in nptelData) {
-      formData.append(key, nptelData[key]);
+      if (nptelData[key]) {
+        formData.append(key, nptelData[key]);
+      }
     }
 
     try {
@@ -42,8 +66,29 @@ const NptelForm = () => {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
       setStatusMessage(response.data.message || "Data submitted successfully!");
+
+      // Reset form after successful submission
+      setNptelData({
+        registrationNumber: localStorage.getItem("reg_no") || "",
+        courseName: "",
+        duration: "",
+        startDate: "",
+        endDate: "",
+        academicYear: "",
+        consolidatedScore: "",
+        credits: "",
+        certificateType: "",
+        issuedBy: "",
+        uploadedCertificate: null,
+      });
     } catch (error) {
-      setStatusMessage("Error submitting data: " + error.message);
+      console.error(
+        "Error submitting data:",
+        error.response?.data || error.message
+      );
+      setStatusMessage(
+        "Error: " + (error.response?.data.message || error.message)
+      );
     }
   };
 
@@ -53,17 +98,24 @@ const NptelForm = () => {
         <h2 className="form-title">NPTEL Form</h2>
         {statusMessage && <p className="status-message">{statusMessage}</p>}
         <form onSubmit={handleFormSubmit} className="form">
+          {/* Registration Number (Read-only) */}
+          <div className="form-field">
+            <label htmlFor="registrationNumber">Registration Number:</label>
+            <input
+              type="text"
+              id="registrationNumber"
+              name="registrationNumber"
+              value={nptelData.registrationNumber}
+              readOnly
+            />
+          </div>
+
+          {/* Other Form Fields */}
           {[
-            {
-              label: "Registration Number",
-              name: "registrationNumber",
-              type: "text",
-            },
             { label: "Course Name", name: "courseName", type: "text" },
             { label: "Duration (weeks)", name: "duration", type: "text" },
             { label: "Start Date", name: "startDate", type: "date" },
             { label: "End Date", name: "endDate", type: "date" },
-            { label: "Academic Year", name: "academicYear", type: "text" },
             {
               label: "Consolidated Score",
               name: "consolidatedScore",
@@ -86,6 +138,29 @@ const NptelForm = () => {
               />
             </div>
           ))}
+
+          {/* Academic Year Dropdown */}
+          <div className="form-field">
+            <label htmlFor="academicYear">Academic Year:</label>
+            <select
+              id="academicYear"
+              placeholder="Choose Academic Year"
+              name="academicYear"
+              value={nptelData.academicYear}
+              onChange={handleInputChange}
+              className="large-input"
+              required
+            >
+              <option value="">Select Academic Year</option>
+              {academicYears.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* File Upload Field */}
           <div className="form-field">
             <label htmlFor="uploadedCertificate">Upload Certificate:</label>
             <input
@@ -96,6 +171,8 @@ const NptelForm = () => {
               required
             />
           </div>
+
+          {/* Submit Button */}
           <div className="submit-btn-container">
             <button type="submit" className="submit-btn">
               Submit

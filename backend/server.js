@@ -77,50 +77,37 @@ app.post("/api/login", (req, res) => {
     return res.status(400).json({ message: "Username and password required" });
   }
 
-  // Check if it's a faculty login (username length = 4)
   if (username.length === 4) {
     const facultyQuery = `SELECT username, password FROM faculty_profile WHERE username = ?`;
     db.query(facultyQuery, [username], (err, results) => {
-      if (err) {
-        console.error("Error querying faculty database:", err.message);
-        return res.status(500).json({ message: "Database error" });
-      }
+      if (err) return res.status(500).json({ message: "Database error" });
 
-      if (results.length === 0) {
+      if (results.length === 0)
         return res.status(404).json({ message: "Faculty not found" });
-      }
 
       const faculty = results[0];
-      if (password !== faculty.password) {
+      if (password !== faculty.password)
         return res.status(401).json({ message: "Invalid password" });
-      }
 
       return res
         .status(200)
-        .json({ message: "Login successful", role: "faculty" });
+        .json({ message: "Login successful", role: "faculty", username });
     });
-  }
-  // Student login logic
-  else {
+  } else {
     const studentQuery = `SELECT reg_no, student_password FROM profile WHERE reg_no = ?`;
     db.query(studentQuery, [username], (err, results) => {
-      if (err) {
-        console.error("Error querying student database:", err.message);
-        return res.status(500).json({ message: "Database error" });
-      }
+      if (err) return res.status(500).json({ message: "Database error" });
 
-      if (results.length === 0) {
+      if (results.length === 0)
         return res.status(404).json({ message: "Student not found" });
-      }
 
       const student = results[0];
-      if (password !== student.student_password) {
+      if (password !== student.student_password)
         return res.status(401).json({ message: "Invalid password" });
-      }
 
       return res
         .status(200)
-        .json({ message: "Login successful", role: "student" });
+        .json({ message: "Login successful", role: "student", username });
     });
   }
 });
@@ -201,7 +188,7 @@ const upload = multer({
 // API to Add NPTEL Data
 app.post("/api/nptel", upload.single("uploadedCertificate"), (req, res) => {
   const {
-    registrationNumber,
+    registrationNumber, // Get username from request
     courseName,
     duration,
     startDate,
@@ -212,6 +199,10 @@ app.post("/api/nptel", upload.single("uploadedCertificate"), (req, res) => {
     certificateType,
     issuedBy,
   } = req.body;
+
+  if (!registrationNumber) {
+    return res.status(400).json({ message: "Registration number is required" });
+  }
 
   if (!courseName) {
     return res.status(400).json({ message: "Course name is required" });
@@ -251,6 +242,7 @@ app.post("/api/nptel", upload.single("uploadedCertificate"), (req, res) => {
     }
   });
 });
+
 app.post(
   "/api/nptel_faculty",
   upload.single("uploadedCertificate"),
@@ -307,64 +299,231 @@ app.post(
     });
   }
 );
+app.post(
+  "/api/certificates_normal_faculty",
+  upload.single("certificateFile"),
+  (req, res) => {
+    const formData = req.body;
+    const file = req.file;
+
+    console.log("Form Data:", formData);
+    console.log("Uploaded File:", file);
+
+    if (formData && file) {
+      const certificatePath = `/certificates/${req.file.filename}`;
+      const {
+        registrationNumber,
+        trainingName,
+        organizedBy,
+        startDate,
+        endDate,
+        mode,
+      } = formData;
+
+      if (
+        !registrationNumber ||
+        !trainingName ||
+        !organizedBy ||
+        !startDate ||
+        !endDate ||
+        !mode ||
+        !certificatePath
+      ) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      const sql =
+        "INSERT INTO certificates_normal_faculty (username,training_name, organized_by, start_date, end_date, mode, certificate_path) VALUES (?,?, ?, ?, ?, ?, ?)";
+      db.query(
+        sql,
+        [
+          registrationNumber,
+          trainingName,
+          organizedBy,
+          startDate,
+          endDate,
+          mode,
+          certificatePath,
+        ],
+        (err, result) => {
+          if (err) {
+            console.error(
+              "Database insert error:",
+              err.message,
+              err.sqlMessage
+            );
+            return res
+              .status(500)
+              .json({ message: "Database error", error: err.sqlMessage });
+          }
+          res.status(200).json({
+            message: "Certificate submitted successfully!",
+            certificatePath: certificatePath,
+          });
+        }
+      );
+    } else {
+      res.status(400).json({ message: "Invalid data" });
+    }
+  }
+);
+app.post(
+  "/api/certificates_normal",
+  upload.single("certificateFile"),
+  (req, res) => {
+    const formData = req.body;
+    const file = req.file;
+
+    console.log("Form Data:", formData);
+    console.log("Uploaded File:", file);
+
+    if (formData && file) {
+      const certificatePath = `/certificates/${req.file.filename}`;
+      const {
+        registrationNumber,
+        trainingName,
+        organizedBy,
+        startDate,
+        endDate,
+        mode,
+      } = formData;
+
+      if (
+        !registrationNumber ||
+        !trainingName ||
+        !organizedBy ||
+        !startDate ||
+        !endDate ||
+        !mode ||
+        !certificatePath
+      ) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      const sql =
+        "INSERT INTO certificates_normal (username,training_name, organized_by, start_date, end_date, mode, certificate_path) VALUES (?,?, ?, ?, ?, ?, ?)";
+      db.query(
+        sql,
+        [
+          registrationNumber,
+          trainingName,
+          organizedBy,
+          startDate,
+          endDate,
+          mode,
+          certificatePath,
+        ],
+        (err, result) => {
+          if (err) {
+            console.error(
+              "Database insert error:",
+              err.message,
+              err.sqlMessage
+            );
+            return res
+              .status(500)
+              .json({ message: "Database error", error: err.sqlMessage });
+          }
+          res.status(200).json({
+            message: "Certificate submitted successfully!",
+            certificatePath: certificatePath,
+          });
+        }
+      );
+    } else {
+      res.status(400).json({ message: "Invalid data" });
+    }
+  }
+);
+// API endpoint to fetch NPTEL and Normal Certificates
 app.get("/api/certificates/:regNo", (req, res) => {
-  const { regNo } = req.params;
+  const regNo = req.params.regNo;
 
-  const query = `
-    SELECT 
-      certificate_path,
-      course_name,
-      academic_year,
-      consolidated_score,
-      elite_status,
-      start_date,
-      end_date
-    FROM nptel 
-    WHERE reg_no = ?
-    ORDER BY start_date DESC
-  `;
+  const nptelQuery = "SELECT * FROM nptel WHERE reg_no = ?";
+  const normalQuery = "SELECT * FROM certificates_normal WHERE username = ?";
 
-  db.query(query, [regNo], (err, results) => {
+  db.query(nptelQuery, [regNo], (err, nptelResults) => {
     if (err) {
-      console.error("Error fetching certificates:", err);
-      return res.status(500).json({ message: "Error fetching certificates" });
+      console.error("Error fetching NPTEL certificates:", err);
+      return res
+        .status(500)
+        .json({ message: "Database error fetching NPTEL certificates" });
     }
 
-    if (results.length === 0) {
-      return res.status(404).json({ message: "No certificates found" });
-    }
+    db.query(normalQuery, [regNo], (err, normalResults) => {
+      if (err) {
+        console.error("Error fetching Normal certificates:", err);
+        return res
+          .status(500)
+          .json({ message: "Database error fetching Normal certificates" });
+      }
 
-    res.json(results);
+      res.status(200).json({
+        nptelCertificates: nptelResults,
+        normalCertificates: normalResults,
+      });
+    });
   });
 });
+
+// app.get("/api/certificates/:regNo", (req, res) => {
+//   const { regNo } = req.params;
+
+//   const query = `
+//     SELECT
+//       certificate_path,
+//       course_name,
+//       academic_year,
+//       consolidated_score,
+//       elite_status,
+//       start_date,
+//       end_date
+//     FROM nptel
+//     WHERE reg_no = ?
+//     ORDER BY start_date DESC
+//   `;
+
+//   db.query(query, [regNo], (err, results) => {
+//     if (err) {
+//       console.error("Error fetching certificates:", err);
+//       return res.status(500).json({ message: "Error fetching certificates" });
+//     }
+
+//     if (results.length === 0) {
+//       return res.status(404).json({ message: "No certificates found" });
+//     }
+
+//     res.json(results);
+//   });
+// });
 app.get("/api/certificates_faculty/:regNo", (req, res) => {
-  const { regNo } = req.params;
+  const regNo = req.params.regNo;
 
-  const query = `
-    SELECT 
-      certificate_path,
-      course_name,
-      academic_year,
-      consolidated_score,
-      elite_status,
-      start_date,
-      end_date
-    FROM faculty_nptel
-    WHERE username = ?
-    ORDER BY start_date DESC
-  `;
+  const nptelQuery = "SELECT * FROM faculty_nptel WHERE username = ?";
+  const normalQuery =
+    "SELECT * FROM certificates_normal_faculty WHERE username = ?";
 
-  db.query(query, [regNo], (err, results) => {
+  db.query(nptelQuery, [regNo], (err, nptelResults) => {
     if (err) {
-      console.error("Error fetching certificates:", err);
-      return res.status(500).json({ message: "Error fetching certificates" });
+      console.error("Error fetching NPTEL certificates:", err);
+      return res
+        .status(500)
+        .json({ message: "Database error fetching NPTEL certificates" });
     }
 
-    if (results.length === 0) {
-      return res.status(404).json({ message: "No certificates found" });
-    }
+    db.query(normalQuery, [regNo], (err, normalResults) => {
+      if (err) {
+        console.error("Error fetching Normal certificates:", err);
+        return res
+          .status(500)
+          .json({ message: "Database error fetching Normal certificates" });
+      }
 
-    res.json(results);
+      res.status(200).json({
+        nptelCertificates: nptelResults,
+        normalCertificates: normalResults,
+      });
+    });
   });
 });
 app.listen(PORT, () => {

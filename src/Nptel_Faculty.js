@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./nptel.css";
 
@@ -18,6 +18,7 @@ const Nptel_Faculty = () => {
   });
 
   const [statusMessage, setStatusMessage] = useState("");
+  const [academicYears, setAcademicYears] = useState([]);
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
@@ -26,7 +27,24 @@ const Nptel_Faculty = () => {
       [name]: files ? files[0] : value,
     }));
   };
+  useEffect(() => {
+    const storedRegNo = localStorage.getItem("reg_no");
+    if (storedRegNo) {
+      setNptelData((prevState) => ({
+        ...prevState,
+        registrationNumber: storedRegNo,
+      }));
+    }
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear - 4;
+    const endYear = currentYear + 4;
 
+    const years = [];
+    for (let year = startYear; year < endYear; year++) {
+      years.push(`${year}-${year + 1}`);
+    }
+    setAcademicYears(years);
+  }, []);
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
@@ -41,9 +59,28 @@ const Nptel_Faculty = () => {
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
+      setNptelData({
+        registrationNumber: localStorage.getItem("reg_no") || "",
+        courseName: "",
+        duration: "",
+        startDate: "",
+        endDate: "",
+        academicYear: "",
+        consolidatedScore: "",
+        credits: "",
+        certificateType: "",
+        issuedBy: "",
+        uploadedCertificate: null,
+      });
       setStatusMessage(response.data.message || "Data submitted successfully!");
     } catch (error) {
-      setStatusMessage("Error submitting data: " + error.message);
+      console.error(
+        "Error submitting data:",
+        error.response?.data || error.message
+      );
+      setStatusMessage(
+        "Error: " + (error.response?.data.message || error.message)
+      );
     }
   };
 
@@ -53,17 +90,22 @@ const Nptel_Faculty = () => {
         <h2 className="form-title">NPTEL Form</h2>
         {statusMessage && <p className="status-message">{statusMessage}</p>}
         <form onSubmit={handleFormSubmit} className="form">
+          <div className="form-field">
+            <label htmlFor="registrationNumber">Faculty ID :</label>
+            <input
+              type="text"
+              id="registrationNumber"
+              name="registrationNumber"
+              value={nptelData.registrationNumber}
+              readOnly
+            />
+          </div>
           {[
-            {
-              label: "Faculty ID",
-              name: "registrationNumber",
-              type: "text",
-            },
             { label: "Course Name", name: "courseName", type: "text" },
             { label: "Duration (weeks)", name: "duration", type: "text" },
             { label: "Start Date", name: "startDate", type: "date" },
             { label: "End Date", name: "endDate", type: "date" },
-            { label: "Year", name: "academicYear", type: "text" },
+  
             {
               label: "Consolidated Score",
               name: "consolidatedScore",
@@ -86,6 +128,25 @@ const Nptel_Faculty = () => {
               />
             </div>
           ))}
+          <div className="form-field">
+            <label htmlFor="academicYear">Academic Year:</label>
+            <select
+              id="academicYear"
+              placeholder="Choose Academic Year"
+              name="academicYear"
+              value={nptelData.academicYear}
+              onChange={handleInputChange}
+              className="large-input"
+              required
+            >
+              <option value="">Select Academic Year</option>
+              {academicYears.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="form-field">
             <label htmlFor="uploadedCertificate">Upload Certificate:</label>
             <input
